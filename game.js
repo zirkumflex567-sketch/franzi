@@ -246,6 +246,7 @@ const Game = (() => {
     const skipBtn = document.getElementById('btn-skip-intro');
     
     vid.src = 'assets/intro_merged.mp4';
+    vid.muted = !state.soundEnabled;
     vid.play().catch(() => {
       console.warn("Autoplay failed, waiting for user click...");
     });
@@ -306,13 +307,24 @@ const Game = (() => {
         e.stopPropagation();
       }
       state.soundEnabled = !state.soundEnabled;
-      if (state.soundEnabled) {
-        soundBtn.textContent = '🔊';
-        if (state.running && bgMusic.paused) bgMusic.play().catch(() => {});
-      } else {
-        soundBtn.textContent = '🔈';
-        bgMusic.pause();
+      
+      // Update Button Icon
+      soundBtn.textContent = state.soundEnabled ? '🔊' : '🔈';
+
+      // Update Music
+      if (bgMusic) {
+        if (state.soundEnabled) {
+          if (state.running && bgMusic.paused) bgMusic.play().catch(() => {});
+        } else {
+          bgMusic.pause();
+        }
       }
+
+      // Update active videos
+      const vids = document.querySelectorAll('video');
+      vids.forEach(v => {
+        v.muted = !state.soundEnabled;
+      });
     };
     soundBtn.addEventListener('click', toggleSound);
     soundBtn.addEventListener('touchstart', toggleSound);
