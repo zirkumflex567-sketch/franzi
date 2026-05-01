@@ -235,21 +235,11 @@ const Game = (() => {
     showScreen('intro-screen');
     const vid = document.getElementById('intro-video');
     const skipBtn = document.getElementById('btn-skip-intro');
-    const playlist = ['assets/video1.mp4', 'assets/video2.mp4', 'assets/video3.mp4'];
-    let currentIdx = 0;
-
-    const playNext = () => {
-      if (currentIdx < playlist.length) {
-        vid.src = playlist[currentIdx];
-        vid.play().catch(() => {
-          // If autoplay fails, we might need a "Start Intro" button, but usually preloader interaction counts.
-          console.warn("Autoplay failed, waiting for user...");
-        });
-        currentIdx++;
-      } else {
-        finishIntro();
-      }
-    };
+    
+    vid.src = 'assets/intro_merged.mp4';
+    vid.play().catch(() => {
+      console.warn("Autoplay failed, waiting for user click...");
+    });
 
     const finishIntro = () => {
       vid.pause();
@@ -257,10 +247,8 @@ const Game = (() => {
       document.getElementById('start-overlay').classList.remove('hidden');
     };
 
-    vid.onended = playNext;
+    vid.onended = finishIntro;
     skipBtn.onclick = finishIntro;
-
-    playNext();
   }
 
   function resize() {

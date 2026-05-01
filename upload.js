@@ -22,14 +22,21 @@ fs.writeFileSync(TMP, dataSlider.toString('base64'));
 execSync(`type "${TMP}" | ssh htown "base64 -d > ${DST}/2/index.html"`, { shell: 'cmd.exe', timeout: 30000 });
 console.log(`Uploaded: 2/index.html`);
 
-// Upload intro videos
+// Upload new intro videos and merge them
 try { execSync(`ssh htown "mkdir -p ${DST}/assets"`); } catch(e){}
-['video1.mp4', 'video2.mp4', 'video3.mp4'].forEach(v => {
+['vid1.mp4', 'vid2.mp4', 'vid3.mp4'].forEach(v => {
   const data = fs.readFileSync(`${SRC}/assets/${v}`);
   fs.writeFileSync(TMP, data.toString('base64'));
   console.log(`Uploading ${v}...`);
   execSync(`type "${TMP}" | ssh htown "base64 -d > ${DST}/assets/${v}"`, { shell: 'cmd.exe', timeout: 120000 });
 });
+
+console.log('Merging videos on server...');
+const mergeCmd = `cd ${DST}/assets && printf "file 'vid1.mp4'\\nfile 'vid2.mp4'\\nfile 'vid3.mp4'" > list.txt && ffmpeg -y -f concat -safe 0 -i list.txt -c copy intro_merged.mp4`;
+execSync(`ssh htown "${mergeCmd}"`, { timeout: 60000 });
+console.log('Merge complete: intro_merged.mp4 created.');
+
+// Upload win video
 
 // Upload win video
 try { execSync(`ssh htown "mkdir -p ${DST}/assets"`); } catch(e){}
