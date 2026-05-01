@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🐴 Franziskas Rodeo – Halt dich fest!</title>
+  <meta name="description" content="Ein personalisiertes Rodeo-Geburtstagsgeschenk für Franziska zum 31.">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bungee+Shade&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="game-container">
+
+    <!-- ===== TITLE SCREEN ===== -->
+    <div id="title-screen" class="screen active">
+      <div class="title-bg"></div>
+      <div class="title-content">
+        <h1 class="title-text">🐴 RODEO<br><span class="title-sub">Franziskas Ritt</span></h1>
+        <p class="title-birthday">Alles Gute zum 31. Geburtstag!</p>
+        <div class="title-instructions">
+          <p>🎯 Halte <strong>3 Minuten</strong> auf dem Pferd!</p>
+          <p>📱 Tippe <strong>links/rechts</strong> zum Balancieren</p>
+          <p>⌨️ Oder nutze <strong>← →</strong> Pfeiltasten</p>
+        </div>
+        <button id="btn-start" class="btn-primary" onclick="Game.start()">🤠 LOS GEHT'S!</button>
+      </div>
+    </div>
+
+    <!-- ===== GAME SCREEN ===== -->
+    <div id="game-screen" class="screen">
+      <canvas id="game-canvas"></canvas>
+
+      <!-- HUD overlay -->
+      <div id="hud">
+        <div id="hud-timer">
+          <div class="hud-label">ZEIT</div>
+          <div id="timer-display">3:00</div>
+        </div>
+        <div id="hud-phase">
+          <div class="hud-label">PHASE</div>
+          <div id="phase-display">Orientierung</div>
+        </div>
+        <div id="hud-balance-bar">
+          <div class="balance-track">
+            <div id="balance-indicator"></div>
+            <div class="balance-center"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QTE overlay -->
+      <div id="qte-overlay" class="hidden">
+        <div id="qte-box">
+          <div id="qte-instruction">⚡ SCHNELL TIPPEN! ⚡</div>
+          <div id="qte-target"></div>
+          <div id="qte-timer-bar"><div id="qte-timer-fill"></div></div>
+        </div>
+      </div>
+
+      <!-- Touch zones (invisible) -->
+      <div id="touch-left" class="touch-zone"></div>
+      <div id="touch-right" class="touch-zone"></div>
+
+      <!-- Vignette effect -->
+      <div id="vignette"></div>
+    </div>
+
+    <!-- ===== FAIL SCREEN ===== -->
+    <div id="fail-screen" class="screen">
+      <div class="result-content">
+        <h2 class="fail-title">💥 ABGEWORFEN!</h2>
+        <p class="fail-text">Du hast <span id="fail-time">0:00</span> durchgehalten!</p>
+        <p class="fail-encourage">Franziska gibt nicht auf! Nochmal?</p>
+        <button class="btn-primary" onclick="Game.restart()">🔄 NOCHMAL!</button>
+      </div>
+    </div>
+
+    <!-- ===== WIN SCREEN ===== -->
+    <div id="win-screen" class="screen">
+      <div class="win-content">
+        <div class="confetti-container" id="confetti-container"></div>
+        <h2 class="win-title">🎉 GESCHAFFT! 🎉</h2>
+        <p class="win-sub">3 Minuten auf dem Rodeo-Pferd!</p>
+        <div class="voucher-card" id="voucher-card">
+          <div class="voucher-ribbon">🎀 GUTSCHEIN 🎀</div>
+          <h3 class="voucher-title">Herzlichen Glückwunsch<br>zum 31. Geburtstag,<br>Franziska!</h3>
+          <div class="voucher-divider"></div>
+          <p class="voucher-text">Du hast dir etwas ganz Besonderes verdient!</p>
+          <p class="voucher-code">🎁 DEIN GESCHENK WARTET 🎁</p>
+        </div>
+        <button class="btn-primary btn-replay" onclick="Game.restart()">🔄 Nochmal reiten!</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

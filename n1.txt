@@ -1,0 +1,79 @@
+Hier ist der aktualisierte Forschungs- und Entwicklungsbericht. Ich habe die Audio-Sektion (7.1) auf deinen Musikwunsch angepasst und die spezifischen KI-Prompts für Franziska direkt in die Sektion 6.2 integriert.
+
+---
+
+# Forschungs- und Entwicklungsbericht: Konzeption, Spieldesign und algorithmische Implementierung eines personalisierten 2D-Rodeo-Mobile-Games
+
+### 1. Einleitung und Spezifikation der Projektparameter
+[cite_start]Die Entwicklung von personalisierten Videospielen für spezifische Anlässe repräsentiert eine hochspezialisierte Nische innerhalb des Game Designs. [cite: 1] [cite_start]Der vorliegende Bericht analysiert die konzeptionellen, technischen und gestalterischen Anforderungen zur Realisierung eines 2D-Mobile-Games, das als interaktives Geburtstagsgeschenk fungiert. [cite: 2] [cite_start]Im Zentrum der Analyse steht die Spezifikation eines Rodeo-Spiels, dessen primäres Ziel es ist, den Spieler – respektive die Spielerin – vor die Herausforderung zu stellen, über einen exakten Zeitraum von drei Minuten auf einem bockenden Pferd zu balancieren. [cite: 3] [cite_start]Ein erfolgreicher Abschluss dieses Survival-Szenarios triggert eine Belohnungssequenz, die einen digitalen Geschenkgutschein freischaltet. [cite: 4] [cite_start]Die narrative und visuelle Identität des Projekts ist stark personalisiert und fokussiert sich auf die Protagonistin namens Franziska, die ihren 31. Geburtstag feiert. [cite: 5] [cite_start]Eine zentrale Anforderung an das visuelle Design ist die Integration ihrer biografischen Historie als ehemalige „Bierkönigin“. [cite: 6] [cite_start]Das Projekt nutzt fotografisches Referenzmaterial von Franziska (blonde, lächelnde Frau), um ein kohärentes Sprite-Design zu erstellen, bei dem die Gesichtszüge erhalten bleiben, die Kleidung jedoch durch eine traditionelle bayerische Tracht (Dirndl) substituiert wird. [cite: 7, 8] [cite_start]Der Bericht evaluiert technologische Frameworks, mathematische Modelle für die Schwierigkeitskurve (inklusive QTEs) und liefert detaillierte Arbeitsabläufe für die Asset-Generierung. [cite: 9, 10]
+
+### 2. Architekturevaluierung und Auswahl der Game-Engine
+[cite_start]Die Auswahl der zugrundeliegenden Softwarearchitektur diktiert maßgeblich die Effizienz des Entwicklungsprozesses für mobile Plattformen. [cite: 11] [cite_start]Für einen kompakten Gameplay-Loop mit Touch-Interaktionen eignen sich Visual-Scripting-Engines wie GDevelop oder Construct 3 am besten. [cite: 12, 13]
+
+| Game Engine | Architektur | Exportkapazitäten | Physik & Steuerung | Relevanz |
+| :--- | :--- | :--- | :--- | :--- |
+| **GDevelop** | Open-Source; [cite_start]Event-basiert [cite: 16] | HTML5, Android, iOS. [cite_start]Exzellente Web-Performance [cite: 17] | [cite_start]Box2D-Physik, native Multi-Touch-Unterstützung [cite: 17] | [cite_start]**Höchste Relevanz** [cite: 18] |
+| **Construct 3** | Proprietär; [cite_start]Event-Sheets [cite: 19] | [cite_start]Hochoptimierter HTML5-Export [cite: 19] | [cite_start]Präzise Touch-Objekt-Erkennung [cite: 19] | [cite_start]**Sehr hoch** [cite: 20] |
+| **Godot 4.x** | Open-Source; [cite_start]Node-basiert [cite: 21] | [cite_start]WebAssembly, native mobile Builds [cite: 21] | [cite_start]Manuelle Touch-Konfiguration nötig [cite: 21] | [cite_start]**Moderat** [cite: 22] |
+
+#### 2.2. Strategische Empfehlung
+[cite_start]Es wird ein Export als HTML5-Projekt favorisiert, das auf Plattformen wie itch.io gehostet werden kann. [cite: 27, 28] [cite_start]Die Zustellung an Franziska erfolgt elegant über einen QR-Code auf einer physischen Karte, der das Spiel verzögerungsfrei im mobilen Browser öffnet. [cite: 28, 29]
+
+### 3. Topologie der Kernmechaniken und mobile Steuerungslogik
+[cite_start]Das Spiel basiert auf dem physikalischen Modell des umgekehrten Pendels (Inverted Pendulum). [cite: 29, 30] Die Reiterin befindet sich oberhalb des Drehpunkts; [cite_start]Schwerkraft und Störkräfte führen ohne Korrektur zum Fall. [cite: 31, 32]
+
+#### 3.1. Variablenarchitektur
+[cite_start]Die globale Fließkommazahl-Variable `CurrentBalance` dient als zentraler Indikator für den Neigungswinkel (0 = Gleichgewicht). [cite: 33, 34] [cite_start]Positive Werte stehen für eine Neigung nach rechts, negative nach links. [cite: 35] [cite_start]Die Engine transformiert diesen Wert in den Rotationswinkel des Sprites; bei Überschreiten der Grenzwerte (±85 Grad) wird der "Fail State" ausgelöst. [cite: 36, 37]
+
+#### 3.2. Integration der mobilen Touch-Steuerung
+[cite_start]Es wird die Screen-Split-Methode empfohlen: Berührungen in der linken Bildschirmhälfte subtrahieren einen Korrekturwert von `CurrentBalance`, Berührungen rechts addieren diesen. [cite: 40, 42, 43] [cite_start]Zur Synchronisation wird der Wert mit der Delta-Zeit (`TimeDelta`) multipliziert. [cite: 44, 45]
+
+### 4. Mathematische Modellierung der Schwierigkeitskurve
+[cite_start]Um 180 Sekunden Spielzeit spannend zu gestalten, wird eine nicht-lineare Schwierigkeitssteigerung implementiert. [cite: 50-53]
+
+#### 4.1. Algorithmische Basis der Störkräfte
+[cite_start]Die Intensität der Störkräfte steigt basierend auf der Quadratwurzel der verstrichenen Zeit. [cite: 55, 56] [cite_start]Bei 60 FPS (10.800 Frames für 3 Min.) ergibt sich der Multiplikator: $\text{Faktor} = 1 + \sqrt{\frac{\text{Frames}}{10800}}$. [cite: 57-59]
+
+#### 4.2. Überlagerung durch Sinuswellen
+[cite_start]Der lineare Anstieg wird mit einer Sinuswelle überlagert, um Flow-Zyklen mit Erholungsphasen (z.B. alle 15 Sekunden) zu schaffen. [cite: 62, 63]
+
+#### 4.3. Zeitleisten-Architektur des 3-Minuten-Überlebenskampfes
+| Zeitfenster | Phasenbezeichnung | Störkraft-Faktor | Stressfaktoren |
+| :--- | :--- | :--- | :--- |
+| 00:00 - 00:30 | Orientierung | [cite_start]1.0 - 1.15 [cite: 65] | [cite_start]Sanftes Wiehern [cite: 66] |
+| 01:15 - 02:00 | Flow-Check | [cite_start]1.40 - 1.65 [cite: 68] | [cite_start]Erster QTE [cite: 69] |
+| 02:00 - 02:40 | Stresstest | [cite_start]1.65 - 1.90 [cite: 70] | [cite_start]Publikumsjubel laut, Kamera-Shake [cite: 71] |
+| 02:40 - 02:59 | Rodeo-Finale | [cite_start]1.90 - 2.04 [cite: 71] | [cite_start]Rote Vignette, konstante Störung [cite: 72] |
+
+### 5. Quick-Time-Events (QTEs)
+[cite_start]QTEs dienen als Rhythmus-Brecher und simulieren extremes Aufbäumen des Pferdes. [cite: 73-75] [cite_start]Bei Erfolg wird `CurrentBalance` zentriert (0); bei Fehlschlag erfolgt ein extremer Ausschlag (z.B. +60). [cite: 85, 86]
+
+### 6. Visuelle Identität und KI-Asset-Generierung
+[cite_start]Für die Personalisierung wird Franziskas Gesicht aus dem Referenzbild mittels Image-to-Image-Verfahren auf ein Pixel-Art-Sprite übertragen. [cite: 88, 93, 94]
+
+#### 6.2. Spezifische Prompt-Architektur
+Für Franziska wurden folgende optimierte Prompts entwickelt:
+
+* **Charakter-Sprite (Franziska & Pferd):** `2D pixel art character sprite sheet, game asset, pure solid white background. A beautiful 31-year-old Bavarian blonde woman with a bright smile, looking like the reference photo, but wearing a highly detailed traditional Bavarian dirndl dress with a blue apron and corset. She is riding on the back of a powerful dark brown bucking rodeo horse. Side profile view. [cite_start]16-bit retro aesthetic.` [cite: 98-103]
+* **Hintergrund (Arena):** `2D game background asset, seamless horizontal loop, pixel art. A dusty wooden rodeo arena fence in the foreground. [cite_start]Flat design.` [cite: 106-108]
+* **Hintergrund (Festzelt):** `2D game background asset, seamless horizontal loop, pixel art. [cite_start]A festive Bavarian beer festival scene, huge Oktoberfest beer tent, blurred cheering crowd, Bavarian Alps in the background.` [cite: 108-110]
+
+### 7. Auditives Feedback und Sound-Design
+[cite_start]Die Audioebene ist essenziell für das Feedback und die Stimmung. [cite: 114]
+
+#### 7.1. Die dynamische Klangkulisse (Zentrales Element)
+Anstelle einer generischen Kulisse wird der Track **„Rodeo“ von Sido feat. [cite_start]Peter Fox** (YouTube: [https://www.youtube.com/watch?v=lGzc44JrBdM](https://www.youtube.com/watch?v=lGzc44JrBdM)) als primärer Hintergrund-Track geloopt. [cite: 116] [cite_start]Die Lyrics über das „Obenbleiben“ verstärken die narrative Kohärenz. [cite: 116] [cite_start]Die Engine-Logik verknüpft die Lautstärke des Tracks mit dem 3-Minuten-Timer; ab der 2-Minuten-Marke (Stresstest) wird die Intensität erhöht. [cite: 117, 118]
+
+#### 7.2. Interaktive Soundeffekte
+* [cite_start]**Warnsignal:** Hartes Schnauben 0,5 Sek. vor QTE. [cite: 120]
+* [cite_start]**Win State:** Bayerische Blasmusik-Fanfare bei 0 Sekunden. [cite: 120]
+
+### 8. Siegbedingung und Gutschein-Übergabe
+[cite_start]Erreicht der `SurvivalTimer` 180 Sekunden, wird die Balance-Logik eingefroren und die Sprite-Animation auf eine Jubel-Pose gewechselt. [cite: 124, 126, 128] [cite_start]Nach 3 Sekunden Verzögerung erfolgt der Wechsel zur `VoucherScene`. [cite: 129] [cite_start]Diese zeigt den digitalisierten Gutschein mit der Botschaft: "Herzlichen Glückwunsch zum 31. Geburtstag, Franziska!". [cite: 131, 132]
+
+### 9. Qualitätssicherung und Deployment
+[cite_start]Alle PNG-Sprites müssen vor dem Import komprimiert werden, um den VRAM mobiler Browser nicht zu überlasten. [cite: 136] [cite_start]Das fertige ZIP-Archiv wird auf itch.io hochgeladen und die URL in einen QR-Code für die Geburtstagskarte transformiert. [cite: 140-144]
+
+---
+
+[cite_start]**Referenzen:** [cite: 148-167] (Gemäß Originaldokumentation)
