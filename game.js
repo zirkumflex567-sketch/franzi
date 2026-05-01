@@ -345,14 +345,19 @@ const Game = (() => {
     
     let tilt = 0;
     const angle = (window.orientation !== undefined) ? window.orientation : (screen.orientation ? screen.orientation.angle : 0);
-    
-    if (angle === 90) {
+    const normAngle = ((angle % 360) + 360) % 360;
+
+    if (normAngle === 90) {
       tilt = -e.beta;
-    } else if (angle === -90 || angle === 270) {
+    } else if (normAngle === 270) {
       tilt = e.beta;
+    } else if (normAngle === 180) {
+      tilt = -e.gamma;
     } else {
-      tilt = e.gamma; // Portrait fallback
+      tilt = e.gamma;
     }
+
+    if (typeof tilt !== 'number' || isNaN(tilt)) tilt = 0;
 
     if (tilt > 90) tilt = 90;
     if (tilt < -90) tilt = -90;

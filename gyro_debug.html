@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gyro Debug</title>
+    <style>
+        body { font-family: sans-serif; background: #222; color: #fff; padding: 20px; }
+        .val { font-size: 1.5rem; color: #f5c542; margin-bottom: 10px; }
+        button { padding: 15px 30px; font-size: 1.2rem; background: #f5c542; border: none; border-radius: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Gyro Debug Tool</h1>
+    <button id="req">Request Permission</button>
+    <div style="margin-top:20px;">
+        <div class="val">Angle: <span id="angle">?</span></div>
+        <div class="val">Alpha: <span id="alpha">?</span></div>
+        <div class="val">Beta: <span id="beta">?</span></div>
+        <div class="val">Gamma: <span id="gamma">?</span></div>
+        <div class="val">Orientation: <span id="orient">?</span></div>
+    </div>
+
+    <script>
+        const req = document.getElementById('req');
+        req.onclick = () => {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(state => {
+                    alert('Permission: ' + state);
+                    start();
+                });
+            } else {
+                start();
+            }
+        };
+
+        function start() {
+            window.addEventListener('deviceorientation', (e) => {
+                document.getElementById('alpha').textContent = e.alpha?.toFixed(2);
+                document.getElementById('beta').textContent = e.beta?.toFixed(2);
+                document.getElementById('gamma').textContent = e.gamma?.toFixed(2);
+                
+                const angle = (window.orientation !== undefined) ? window.orientation : (screen.orientation ? screen.orientation.angle : 0);
+                document.getElementById('angle').textContent = angle;
+                document.getElementById('orient').textContent = screen.orientation?.type || 'unknown';
+            });
+        }
+    </script>
+</body>
+</html>
