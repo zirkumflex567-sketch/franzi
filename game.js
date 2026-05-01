@@ -108,7 +108,7 @@ const Game = (() => {
     cooldown: 2 + Math.random() * 4, // seconds until next animation starts
     cooldownTimer: Math.random() * 3,  // stagger start times
     x: 0,                              // randomized on start()
-    scale: 1.4,                         // Balanced for landscape mode
+    scale: 1.0,                         // Reduced for landscape mode
   }));
 
   // Randomize guy positions along the fence each run
@@ -900,7 +900,7 @@ const Game = (() => {
     ctx.save();
     ctx.translate(cx, groundY);
 
-    if (assets.horseFramesLoaded === HORSE_TOTAL_FRAMES) {
+    if (assets.horseFramesLoaded >= HORSE_TOTAL_FRAMES) {
       // ===== CORRECT VISUAL FRAME MAPPING (verified by viewing each image) =====
       // 1.png  = idle (standing still, side view)
       // 2.png  = run (trotting, one leg up)
