@@ -53,6 +53,7 @@ const Game = (() => {
     qteActive: false,
     qteTimer: 0,
     qteFired: [],         // which QTEs already triggered
+    soundEnabled: true,   // global sound state
     dustParticles: [],
     cameraShake: { x: 0, y: 0, intensity: 0 },
   };
@@ -245,27 +246,39 @@ const Game = (() => {
       if (e.key === 'ArrowRight') state.inputRight = false;
     });
 
-    // Touch – visible buttons
-    const tl = document.getElementById('btn-left');
-    const tr = document.getElementById('btn-right');
+    // Touch / Mouse – Screen halves
+    const handleStart = (e) => {
+      if (state.qteActive) return; // QTE has its own buttons
+      e.preventDefault();
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      if (x < window.innerWidth / 2) state.inputLeft = true;
+      else state.inputRight = true;
+    };
+    const handleEnd = (e) => {
+      e.preventDefault();
+      state.inputLeft = false;
+      state.inputRight = false;
+    };
 
-    const handleLeftStart = (e) => { e.preventDefault(); state.inputLeft = true; };
-    const handleLeftEnd = (e) => { e.preventDefault(); state.inputLeft = false; };
-    const handleRightStart = (e) => { e.preventDefault(); state.inputRight = true; };
-    const handleRightEnd = (e) => { e.preventDefault(); state.inputRight = false; };
+    canvas.addEventListener('touchstart', handleStart);
+    canvas.addEventListener('touchend', handleEnd);
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mouseup', handleEnd);
+    canvas.addEventListener('mouseleave', handleEnd);
 
-    // Support both touch and mouse on buttons
-    tl.addEventListener('touchstart', handleLeftStart);
-    tl.addEventListener('touchend', handleLeftEnd);
-    tl.addEventListener('mousedown', handleLeftStart);
-    tl.addEventListener('mouseup', handleLeftEnd);
-    tl.addEventListener('mouseleave', handleLeftEnd);
-
-    tr.addEventListener('touchstart', handleRightStart);
-    tr.addEventListener('touchend', handleRightEnd);
-    tr.addEventListener('mousedown', handleRightStart);
-    tr.addEventListener('mouseup', handleRightEnd);
-    tr.addEventListener('mouseleave', handleRightEnd);
+    // Sound Toggle
+    const soundBtn = document.getElementById('btn-sound-toggle');
+    soundBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.soundEnabled = !state.soundEnabled;
+      if (state.soundEnabled) {
+        soundBtn.textContent = '🔊';
+        if (state.running && bgMusic.paused) bgMusic.play().catch(() => {});
+      } else {
+        soundBtn.textContent = '🔈';
+        bgMusic.pause();
+      }
+    });
   }
 
   // === GYRO SETUP ===
@@ -338,9 +351,9 @@ const Game = (() => {
     randomizeGuyPositions();
     showScreen('game-screen');
     document.getElementById('vignette').style.opacity = '0';
-    // Start music without resetting it to 0
-    if (bgMusic && bgMusic.paused) {
-      bgMusic.play().catch(() => {}); // autoplay may fail without user gesture
+    // Start music only if enabled
+    if (bgMusic && bgMusic.paused && state.soundEnabled) {
+      bgMusic.play().catch(() => {});
     }
     loopId = requestAnimationFrame(loop);
   }
