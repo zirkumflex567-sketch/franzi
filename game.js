@@ -228,6 +228,32 @@ const Game = (() => {
 
     // Init background music
     // (Audio is now loaded in loadAssets)
+    
+    // READ URL PARAMETERS (Difficulty & Debug)
+    const urlParams = new URLSearchParams(window.location.search);
+    const diffParam = urlParams.get('diff');
+    if (diffParam) {
+      const d = parseFloat(diffParam);
+      if (!isNaN(d) && d > 0) {
+        console.log("Applying difficulty multiplier:", d);
+        CFG.GRAVITY_BASE *= d;
+        CFG.DISTURB_BASE *= d;
+        CFG.CORRECTION_SPEED *= (1 + (d - 1) * 0.5); // Adjust correction slightly to keep it playable
+      }
+    }
+    const debugParam = urlParams.get('debug');
+    if (debugParam === 'true') {
+      const dbgBtn = document.getElementById('btn-debug-jump');
+      if (dbgBtn) dbgBtn.classList.remove('hidden');
+    }
+  }
+
+  // === DEBUG FUNCTIONS ===
+  function jumpToLastEvent() {
+    if (!state.running) return;
+    // Jump to 1s before end (Last event is at 179s)
+    state.elapsed = 178.5;
+    console.log("Debug: Jumped to 178.5s");
   }
 
   // === INTRO PLAYER ===
@@ -990,5 +1016,5 @@ const Game = (() => {
 
   // Init on load
   window.addEventListener('DOMContentLoaded', init);
-  return { start, restart, playIntro };
+  return { start, restart, playIntro, jumpToLastEvent };
 })();
