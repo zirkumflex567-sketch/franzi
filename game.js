@@ -56,6 +56,7 @@ const Game = (() => {
     soundEnabled: true,   // global sound state
     dustParticles: [],
     cameraShake: { x: 0, y: 0, intensity: 0 },
+    assetsReady: false,
   };
 
   let canvas, ctx, W, H;
@@ -154,11 +155,21 @@ const Game = (() => {
       if (text) text.textContent = `Lade... ${fakeCount} / ${fakeMax}`;
 
       if (loadedCount >= totalAssets) {
-        text.textContent = "ALLES BEREIT!";
-        const startBtn = document.getElementById('btn-start-intro');
-        if (startBtn) startBtn.classList.remove('hidden');
+        finishLoading();
       }
     }
+
+    function finishLoading() {
+      if (state.assetsReady) return;
+      state.assetsReady = true;
+      text.textContent = "ALLES BEREIT!";
+      const startBtn = document.getElementById('btn-start-intro');
+      if (startBtn) startBtn.classList.remove('hidden');
+      console.log("Loading finished.");
+    }
+
+    // Force finish after 12 seconds even if some assets hang
+    setTimeout(finishLoading, 12000);
 
     assets.bg.onload = () => { assets.bgLoaded = true; updateProgress(); };
     assets.bg.onerror = () => { assets.bgLoaded = false; updateProgress(); };
@@ -206,18 +217,8 @@ const Game = (() => {
   }
 
   // === INIT ===
+
   function init() {
-    // Check URL for difficulty parameter
-    const params = new URLSearchParams(window.location.search);
-    const diffParam = params.get('diff');
-    if (diffParam) {
-      const diffMultiplier = parseFloat(diffParam);
-      if (!isNaN(diffMultiplier) && diffMultiplier > 0) {
-        CFG.GRAVITY_BASE *= diffMultiplier;
-        CFG.DISTURB_BASE *= diffMultiplier;
-        console.log(`Difficulty scaled by ${diffMultiplier}`);
-      }
-    }
 
     canvas = document.getElementById('game-canvas');
     ctx = canvas.getContext('2d');
