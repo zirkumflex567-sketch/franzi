@@ -232,6 +232,15 @@ const Game = (() => {
 
   // === INTRO PLAYER ===
   function playIntro() {
+    // Request Fullscreen on user gesture to hide browser UI
+    try {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen().catch(() => {});
+      }
+    } catch(e) {}
+
     showScreen('intro-screen');
     const vid = document.getElementById('intro-video');
     const skipBtn = document.getElementById('btn-skip-intro');
