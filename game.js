@@ -8,9 +8,9 @@ const Game = (() => {
   const CFG = {
     DURATION: 180,          // 3 minutes in seconds
     FAIL_ANGLE: 85,         // degrees → game over
-    CORRECTION_SPEED: 220,  // balance correction per second (reduced from 280 = harder)
-    GRAVITY_BASE: 18,       // base gravity pull (increased from 12 = harder)
-    DISTURB_BASE: 30,       // base disturbance strength (increased from 25)
+    CORRECTION_SPEED: 220,  // balance correction per second
+    GRAVITY_BASE: 25,       // base gravity pull (increased from 18 = much harder)
+    DISTURB_BASE: 45,       // base disturbance strength (increased from 30)
     HORSE_BOB_SPEED: 3,     // horse bobbing frequency
     GRACE_PERIOD: 3,        // seconds of invincibility at start
     QTE_TIMES: [45, 90, 130, 165], // 4 QTEs instead of 3, spread across the game
@@ -42,6 +42,7 @@ const Game = (() => {
   };
 
   let canvas, ctx, W, H;
+  let loopId = null; // To prevent multiple loops running
 
   // === ASSET PLACEHOLDERS ===
   const assets = {
@@ -183,24 +184,33 @@ const Game = (() => {
       if (e.key === 'ArrowRight') state.inputRight = false;
     });
 
-    // Touch – split screen method
-    const tl = document.getElementById('touch-left');
-    const tr = document.getElementById('touch-right');
+    // Touch – visible buttons
+    const tl = document.getElementById('btn-left');
+    const tr = document.getElementById('btn-right');
 
-    tl.addEventListener('touchstart', e => { e.preventDefault(); state.inputLeft = true; if (state.qteActive) handleQTETap(); });
-    tl.addEventListener('touchend', e => { e.preventDefault(); state.inputLeft = false; });
-    tr.addEventListener('touchstart', e => { e.preventDefault(); state.inputRight = true; if (state.qteActive) handleQTETap(); });
-    tr.addEventListener('touchend', e => { e.preventDefault(); state.inputRight = false; });
+    const handleLeftStart = (e) => { e.preventDefault(); state.inputLeft = true; if (state.qteActive) handleQTETap(); };
+    const handleLeftEnd = (e) => { e.preventDefault(); state.inputLeft = false; };
+    const handleRightStart = (e) => { e.preventDefault(); state.inputRight = true; if (state.qteActive) handleQTETap(); };
+    const handleRightEnd = (e) => { e.preventDefault(); state.inputRight = false; };
 
-    // Mouse fallback
-    tl.addEventListener('mousedown', () => { state.inputLeft = true; if (state.qteActive) handleQTETap(); });
-    tl.addEventListener('mouseup', () => { state.inputLeft = false; });
-    tr.addEventListener('mousedown', () => { state.inputRight = true; if (state.qteActive) handleQTETap(); });
-    tr.addEventListener('mouseup', () => { state.inputRight = false; });
+    // Support both touch and mouse on buttons
+    tl.addEventListener('touchstart', handleLeftStart);
+    tl.addEventListener('touchend', handleLeftEnd);
+    tl.addEventListener('mousedown', handleLeftStart);
+    tl.addEventListener('mouseup', handleLeftEnd);
+    tl.addEventListener('mouseleave', handleLeftEnd);
+
+    tr.addEventListener('touchstart', handleRightStart);
+    tr.addEventListener('touchend', handleRightEnd);
+    tr.addEventListener('mousedown', handleRightStart);
+    tr.addEventListener('mouseup', handleRightEnd);
+    tr.addEventListener('mouseleave', handleRightEnd);
   }
 
   // === START / RESTART ===
   function start() {
+    if (loopId) cancelAnimationFrame(loopId);
+
     state = {
       running: true, failed: false, won: false, balance: 0, elapsed: 0, lastTime: performance.now(),
       inputLeft: false, inputRight: false,
@@ -208,17 +218,16 @@ const Game = (() => {
       dustParticles: [],
       cameraShake: { x: 0, y: 0, intensity: 0 },
       failTime: 0,
-      winTime: 0, // tracks win animation time
+      winTime: 0,
     };
     randomizeGuyPositions();
     showScreen('game-screen');
     document.getElementById('vignette').style.opacity = '0';
-    // Start music
-    if (bgMusic) {
-      bgMusic.currentTime = 0;
+    // Start music without resetting it to 0
+    if (bgMusic && bgMusic.paused) {
       bgMusic.play().catch(() => {}); // autoplay may fail without user gesture
     }
-    requestAnimationFrame(loop);
+    loopId = requestAnimationFrame(loop);
   }
 
   function restart() { start(); }
@@ -258,7 +267,7 @@ const Game = (() => {
 
     // continue loop even if not running to play fail animation
     if (state.running || state.failed) {
-      requestAnimationFrame(loop);
+      loopId = requestAnimationFrame(loop);
     }
   }
 
@@ -647,7 +656,9 @@ const Game = (() => {
 
       const img = assets.horseFrames[frameId];
       if (img && img.naturalWidth) {
-        const targetW = W * 0.4;
+        // Significantly larger horse: take up more screen width, especially on mobile!
+        // At least 350px wide, or 65% of screen width if that's larger. But don't exceed 600px.
+        const targetW = Math.min(Math.max(W * 0.65, 350), 600);
         const s = targetW / img.naturalWidth;
         const dw = img.naturalWidth * s;
         const dh = img.naturalHeight * s;
@@ -670,23 +681,6 @@ const Game = (() => {
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
       ctx.fill();
     });
-  }
-
-  function drawTouchHints() {
-    // Subtle touch zone hints
-    if (state.elapsed < 5) {
-      const alpha = Math.max(0, 1 - state.elapsed / 5) * 0.15;
-      ctx.fillStyle = `rgba(46,204,113,${alpha})`;
-      ctx.fillRect(0, 0, W / 2, H);
-      ctx.fillStyle = `rgba(231,76,60,${alpha})`;
-      ctx.fillRect(W / 2, 0, W / 2, H);
-      // Labels
-      ctx.fillStyle = `rgba(255,255,255,${alpha * 3})`;
-      ctx.font = 'bold 20px Fredoka';
-      ctx.textAlign = 'center';
-      ctx.fillText('← LINKS', W * 0.25, H / 2);
-      ctx.fillText('RECHTS →', W * 0.75, H / 2);
-    }
   }
 
   // === WIN / FAIL ===
