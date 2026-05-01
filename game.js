@@ -795,34 +795,33 @@ const Game = (() => {
       } else if (state.qteActive) {
         // QTE: front-facing view
         frameId = 3;
-      } else if (state.elapsed > 160) {
-        // RODEO FINALE: rapid wild bucking
-        const buckPhase = Math.floor(state.elapsed * 8) % 4;
-        if (buckPhase === 0) frameId = 9;       // buck
-        else if (buckPhase === 1) frameId = 11;  // buck_2 (rearing)
-        else if (buckPhase === 2) frameId = 10;  // fast gallop
-        else frameId = 9;                        // buck again
+      } else if (state.elapsed > 150) {
+        // RODEO FINALE: fast but sequenced bucking
+        const finaleFrames = [9, 11, 9, 10, 11, 4];
+        frameId = finaleFrames[Math.floor(state.elapsed * 7) % 6];
       } else if (Math.abs(state.balance) > 50) {
-        // HEAVY TILT: violently toggle between buck and rear to show loss of control
-        const step = Math.floor(state.elapsed * 10);
-        frameId = step % 2 === 0 ? 9 : 11;
+        // HEAVY TILT: desperate struggle
+        const heavyFrames = [9, 11, 10, 9, 11, 4];
+        frameId = heavyFrames[Math.floor(state.elapsed * 6) % 6];
       } else if (Math.abs(state.balance) > 30) {
-        // MODERATE TILT: wild galloping and bucking
-        const step = Math.floor(state.elapsed * 10);
-        frameId = step % 2 === 0 ? 10 : (state.balance < 0 ? 9 : 11);
+        // MODERATE TILT: galloping and bucking mix
+        const modFrames = [10, 9, 4, 11, 2, 14];
+        frameId = modFrames[Math.floor(state.elapsed * 6) % 6];
       } else {
-        // NORMAL RODEO: Chaotic, unpredictable mix of movements instead of a smooth run
-        const speed = 8; // 8 frames per second
-        const step = Math.floor(state.elapsed * speed);
-        // Pseudo-random seeded by step
-        const rand = Math.abs(Math.sin(step * 43.21)) * 100;
+        // NORMAL RODEO: Smooth running with occasional organized bucking sequences
+        const step = Math.floor(state.elapsed * 5); // 5 frames per second
+        const sequenceIdx = Math.floor(step / 6);   // changes every 1.2 seconds
         
-        if (rand < 25) frameId = 9;       // wild bucking
-        else if (rand < 50) frameId = 11; // rearing up
-        else if (rand < 70) frameId = 10; // fast gallop
-        else if (rand < 80) frameId = 4;  // run_2
-        else if (rand < 90) frameId = 2;  // run
-        else frameId = 14;                // run_3
+        // 40% chance to do a bucking sequence instead of a run sequence
+        const isBucking = Math.abs(Math.sin(sequenceIdx * 123.45)) > 0.6; 
+        
+        if (isBucking) {
+           const buckFrames = [10, 9, 11, 9, 4, 14];
+           frameId = buckFrames[step % 6];
+        } else {
+           const runFrames = [2, 4, 10, 14, 2, 7];
+           frameId = runFrames[step % 6];
+        }
       }
 
       const img = assets.horseFrames[frameId];
