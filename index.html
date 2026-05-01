@@ -2,7 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>🐴 Franziskas Rodeo – Halt dich fest!</title>
   <meta name="description" content="Ein personalisiertes Rodeo-Geburtstagsgeschenk für Franziska zum 31.">
   <link rel="stylesheet" href="style.css">
@@ -10,6 +13,13 @@
 </head>
 <body>
   <div id="game-container">
+  
+    <!-- ===== LANDSCAPE WARNING ===== -->
+    <div id="landscape-warning">
+      <div style="font-size: 4rem; margin-bottom: 1rem;">🔄</div>
+      <h2>Bitte drehe dein Handy wieder hochkant!</h2>
+      <p>Das Rodeo funktioniert nur im Hochformat.</p>
+    </div>
 
     <!-- ===== TITLE SCREEN ===== -->
     <div id="title-screen" class="screen active">

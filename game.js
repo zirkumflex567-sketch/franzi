@@ -264,6 +264,16 @@ const Game = (() => {
   function internalStart(mode) {
     if (loopId) cancelAnimationFrame(loopId);
 
+    // Try to force fullscreen and lock portrait mode
+    try {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch(() => {});
+      }
+    } catch(e) {}
+
     state = {
       running: true, failed: false, won: false, balance: 0, elapsed: 0, lastTime: 0,
       inputLeft: false, inputRight: false,
