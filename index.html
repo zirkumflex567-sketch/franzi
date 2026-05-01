@@ -21,8 +21,17 @@
       <p>Das Rodeo funktioniert nur im Hochformat.</p>
     </div>
 
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loading-screen" class="screen active" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111;">
+      <h2 style="font-family: var(--font-title); font-size: 2.5rem; color: var(--col-gold); margin-bottom: 1rem;">LÄDT...</h2>
+      <div style="width: 80vw; max-width: 400px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; border: 2px solid var(--col-gold);">
+        <div id="loading-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--col-gold), #f39c12); transition: width 0.1s;"></div>
+      </div>
+      <p id="loading-text" style="margin-top: 15px; font-size: 1.1rem; color: var(--col-white); opacity: 0.8; font-family: var(--font-body);">Assets werden geladen...</p>
+    </div>
+
     <!-- ===== TITLE SCREEN ===== -->
-    <div id="title-screen" class="screen active">
+    <div id="title-screen" class="screen">
       <div class="title-bg"></div>
       <div class="title-content">
         <h1 class="title-text">🐴 RODEO<br><span class="title-sub">Franziskas Ritt</span></h1>

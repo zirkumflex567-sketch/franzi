@@ -132,23 +132,55 @@ const Game = (() => {
 
   // Try loading images – if not found, we draw placeholders
   function loadAssets() {
-    assets.bg.onload = () => { assets.bgLoaded = true; };
-    assets.bg.onerror = () => { assets.bgLoaded = false; };
+    let totalAssets = 1 + HORSE_TOTAL_FRAMES + GUY_TOTAL_IMAGES + 1; // bg + horse + guys + audio
+    let loadedCount = 0;
+
+    function updateProgress() {
+      loadedCount++;
+      const pct = Math.floor((loadedCount / totalAssets) * 100);
+      const bar = document.getElementById('loading-bar');
+      const text = document.getElementById('loading-text');
+      if (bar) bar.style.width = pct + '%';
+      if (text) text.textContent = `Lade... ${loadedCount} / ${totalAssets}`;
+
+      if (loadedCount >= totalAssets) {
+        setTimeout(() => showScreen('title-screen'), 300);
+      }
+    }
+
+    assets.bg.onload = () => { assets.bgLoaded = true; updateProgress(); };
+    assets.bg.onerror = () => { assets.bgLoaded = false; updateProgress(); };
     assets.bg.src = 'assets/arena.jpeg';
+
+    // Init background music
+    bgMusic = new Audio();
+    bgMusic.addEventListener('canplaythrough', () => {
+      if (!bgMusic.loadedFlag) {
+        bgMusic.loadedFlag = true;
+        updateProgress();
+      }
+    });
+    bgMusic.onerror = () => { if(!bgMusic.loadedFlag) { bgMusic.loadedFlag=true; updateProgress(); } };
+    bgMusic.loop = true;
+    bgMusic.volume = 0.5;
+    bgMusic.src = 'assets/rodeo.mp3';
+    bgMusic.load();
 
     // Load Horse States (1 to 15)
     for (let i = 1; i <= HORSE_TOTAL_FRAMES; i++) {
-      assets.horseFrames[i].onload = () => { assets.horseFramesLoaded++; };
+      assets.horseFrames[i].onload = () => { assets.horseFramesLoaded++; updateProgress(); };
+      assets.horseFrames[i].onerror = updateProgress;
       assets.horseFrames[i].src = `assets/${i}.png`;
     }
 
-    // Load all guy frames from assets/sheets/{name}{view}/images/{name}{view}_XX.png
+    // Load all guy frames
     GUY_NAMES.forEach(name => {
       GUY_VIEWS.forEach(view => {
         for (let i = 0; i < GUY_FRAME_COUNT; i++) {
           const imgNum = (i + 1).toString().padStart(2, '0');
-          const key = name + view; // e.g. "ahrensfront"
-          assets.guys[name][view][i].onload = () => { assets.guysLoaded++; };
+          const key = name + view;
+          assets.guys[name][view][i].onload = () => { assets.guysLoaded++; updateProgress(); };
+          assets.guys[name][view][i].onerror = updateProgress;
           assets.guys[name][view][i].src = `assets/sheets/${key}/images/${key}_${imgNum}.png`;
         }
       });
@@ -171,9 +203,7 @@ const Game = (() => {
     setupInput();
 
     // Init background music
-    bgMusic = new Audio('assets/rodeo.mp3');
-    bgMusic.loop = true;
-    bgMusic.volume = 0.5;
+    // (Audio is now loaded in loadAssets)
   }
 
   function resize() {
