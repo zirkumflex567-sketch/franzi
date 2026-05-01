@@ -13,9 +13,8 @@ const Game = (() => {
     DISTURB_BASE: 45,       // base disturbance strength (increased from 30)
     HORSE_BOB_SPEED: 3,     // horse bobbing frequency
     GRACE_PERIOD: 3,        // seconds of invincibility at start
-    QTE_TIMES: [45, 90, 130, 165], // 4 QTEs instead of 3, spread across the game
-    QTE_DURATION: 2.5,      // seconds to complete QTE (was 3 = harder)
-    QTE_TAPS: 10,           // taps needed (was 8 = harder)
+    QTE_TIMES: [45, 90, 130, 165], // 4 QTEs
+    QTE_DURATION: 3.5,      // 3.5 seconds to solve Stroop test
     PHASES: [
       { name: 'Orientierung', start: 0,   end: 30,  color: '#2ecc71' },
       { name: 'Aufwärmung',   start: 30,  end: 75,  color: '#3498db' },
@@ -24,6 +23,18 @@ const Game = (() => {
       { name: 'RODEO-FINALE', start: 160, end: 180, color: '#e74c3c' },
     ],
   };
+
+  const STROOP_COLORS = [
+    { name: 'Grün', hex: '#2ecc71' },
+    { name: 'Gelb', hex: '#f1c40f' },
+    { name: 'Rot', hex: '#e74c3c' },
+    { name: 'Schwarz', hex: '#000000' },
+    { name: 'Blau', hex: '#3498db' },
+    { name: 'Lila', hex: '#9b59b6' },
+    { name: 'Weiß', hex: '#ffffff' },
+    { name: 'Orange', hex: '#e67e22' },
+    { name: 'Pink', hex: '#ff9ff3' }
+  ];
 
   // === STATE ===
   let state = {
@@ -34,7 +45,6 @@ const Game = (() => {
     inputLeft: false,
     inputRight: false,
     qteActive: false,
-    qteTaps: 0,
     qteTimer: 0,
     qteFired: [],         // which QTEs already triggered
     dustParticles: [],
@@ -177,7 +187,6 @@ const Game = (() => {
     window.addEventListener('keydown', e => {
       if (e.key === 'ArrowLeft') state.inputLeft = true;
       if (e.key === 'ArrowRight') state.inputRight = true;
-      if (e.key === ' ' && state.qteActive) handleQTETap();
     });
     window.addEventListener('keyup', e => {
       if (e.key === 'ArrowLeft') state.inputLeft = false;
@@ -188,9 +197,9 @@ const Game = (() => {
     const tl = document.getElementById('btn-left');
     const tr = document.getElementById('btn-right');
 
-    const handleLeftStart = (e) => { e.preventDefault(); state.inputLeft = true; if (state.qteActive) handleQTETap(); };
+    const handleLeftStart = (e) => { e.preventDefault(); state.inputLeft = true; };
     const handleLeftEnd = (e) => { e.preventDefault(); state.inputLeft = false; };
-    const handleRightStart = (e) => { e.preventDefault(); state.inputRight = true; if (state.qteActive) handleQTETap(); };
+    const handleRightStart = (e) => { e.preventDefault(); state.inputRight = true; };
     const handleRightEnd = (e) => { e.preventDefault(); state.inputRight = false; };
 
     // Support both touch and mouse on buttons
@@ -214,7 +223,7 @@ const Game = (() => {
     state = {
       running: true, failed: false, won: false, balance: 0, elapsed: 0, lastTime: performance.now(),
       inputLeft: false, inputRight: false,
-      qteActive: false, qteTaps: 0, qteTimer: 0, qteFired: [],
+      qteActive: false, qteTimer: 0, qteFired: [],
       dustParticles: [],
       cameraShake: { x: 0, y: 0, intensity: 0 },
       failTime: 0,
@@ -337,17 +346,6 @@ const Game = (() => {
 
   // === QTE SYSTEM ===
   function updateQTE(dt) {
-    if (state.qteActive) {
-      state.qteTimer -= dt;
-      const fill = Math.max(0, state.qteTimer / CFG.QTE_DURATION) * 100;
-      document.getElementById('qte-timer-fill').style.width = fill + '%';
-      document.getElementById('qte-target').textContent =
-        '👆'.repeat(CFG.QTE_TAPS - state.qteTaps) + '✅'.repeat(state.qteTaps);
-
-      if (state.qteTimer <= 0) { endQTE(false); }
-      return;
-    }
-
     // Check if we should fire a QTE
     CFG.QTE_TIMES.forEach((time, i) => {
       if (state.elapsed >= time && !state.qteFired.includes(i)) {
@@ -355,21 +353,69 @@ const Game = (() => {
         startQTE();
       }
     });
+
+    if (!state.qteActive) return;
+    state.qteTimer -= dt;
+
+    const pct = Math.max(0, state.qteTimer / CFG.QTE_DURATION);
+    document.getElementById('qte-timer-fill').style.width = (pct * 100) + '%';
+
+    if (state.qteTimer <= 0) { endQTE(false); }
   }
 
   function startQTE() {
     state.qteActive = true;
-    state.qteTaps = 0;
     state.qteTimer = CFG.QTE_DURATION;
+
+    // 0 = Wähle das Wort, 1 = Wähle die Farbe
+    state.qteMode = Math.random() < 0.5 ? 0 : 1;
+    
+    // Pick 3 unique colors for the buttons
+    let choices = [...STROOP_COLORS].sort(() => 0.5 - Math.random()).slice(0, 3);
+    
+    // Pick one as the correct answer
+    let correctIdx = Math.floor(Math.random() * 3);
+    let correctItem = choices[correctIdx];
+    
+    const instrEl = document.getElementById('qte-instruction');
+    if (state.qteMode === 0) {
+      instrEl.innerHTML = `Wähle das Wort:<br><span style="color:white; font-size: 2rem;">${correctItem.name.toUpperCase()}</span>`;
+    } else {
+      instrEl.innerHTML = `Wähle die Farbe:<br><span style="color:white; font-size: 2rem;">${correctItem.name.toUpperCase()}</span>`;
+    }
+    
+    document.getElementById('qte-target').style.display = 'none';
+    
+    // Setup the 3 buttons
+    for (let i = 0; i < 3; i++) {
+       let btn = document.getElementById(`qte-btn-${i}`);
+       let btnWord, btnColorHex;
+       
+       if (state.qteMode === 0) {
+           btnWord = choices[i].name.toUpperCase();
+           let otherColors = STROOP_COLORS.filter(c => c.name !== choices[i].name);
+           btnColorHex = otherColors[Math.floor(Math.random() * otherColors.length)].hex;
+       } else {
+           btnColorHex = choices[i].hex;
+           let otherWords = STROOP_COLORS.filter(c => c.hex !== choices[i].hex);
+           btnWord = otherWords[Math.floor(Math.random() * otherWords.length)].name.toUpperCase();
+       }
+       
+       btn.textContent = btnWord;
+       btn.style.color = btnColorHex;
+       btn.style.textShadow = '1px 1px 3px #000, -1px -1px 3px #000, 1px -1px 3px #000, -1px 1px 3px #000';
+       
+       // remove old listeners
+       const newBtn = btn.cloneNode(true);
+       btn.parentNode.replaceChild(newBtn, btn);
+       newBtn.onclick = () => {
+           if (i === correctIdx) endQTE(true);
+           else endQTE(false);
+       };
+    }
+
     document.getElementById('qte-overlay').classList.remove('hidden');
     triggerShake(0.6);
-  }
-
-  function handleQTETap() {
-    if (!state.qteActive) return;
-    state.qteTaps++;
-    triggerShake(0.15);
-    if (state.qteTaps >= CFG.QTE_TAPS) { endQTE(true); }
   }
 
   function endQTE(success) {
@@ -509,7 +555,6 @@ const Game = (() => {
     drawHorse();
     drawRider();
     drawDust();
-    drawTouchHints();
 
     ctx.restore();
   }
