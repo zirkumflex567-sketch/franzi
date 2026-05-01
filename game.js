@@ -35,11 +35,7 @@ const Game = (() => {
     { name: 'Weiß', hex: '#ffffff' },
     { name: 'Orange', hex: '#e67e22' },
     { name: 'Pink', hex: '#ff9ff3' },
-    { name: 'Grau', hex: '#95a5a6' },
-    { name: 'Braun', hex: '#8B4513' },
-    { name: 'Cyan', hex: '#00ffff' },
-    { name: 'Beige', hex: '#f5f5dc' },
-    { name: 'Türkis', hex: '#1abc9c' }
+    { name: 'Braun', hex: '#8B4513' }
   ];
 
   // === STATE ===
@@ -53,10 +49,10 @@ const Game = (() => {
     qteActive: false,
     qteTimer: 0,
     qteFired: [],         // which QTEs already triggered
-    soundEnabled: true,   // global sound state
     dustParticles: [],
     cameraShake: { x: 0, y: 0, intensity: 0 },
     assetsReady: false,
+    soundEnabled: true,   // Moved here to be clear
   };
 
   let canvas, ctx, W, H;
@@ -439,6 +435,8 @@ const Game = (() => {
       cameraShake: { x: 0, y: 0, intensity: 0 },
       failTime: 0,
       winTime: 0,
+      soundEnabled: state.soundEnabled, // Preserve sound setting!
+      assetsReady: state.assetsReady,
     };
     randomizeGuyPositions();
     showScreen('game-screen');
