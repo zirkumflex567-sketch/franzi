@@ -142,11 +142,12 @@ const Game = (() => {
     let totalAssets = 1 + HORSE_TOTAL_FRAMES + GUY_TOTAL_IMAGES + 1; // bg + horse + guys + audio
     let loadedCount = 0;
 
+    const bar = document.getElementById('loading-bar');
+    const text = document.getElementById('loading-text');
+
     function updateProgress() {
       loadedCount++;
       const pct = Math.floor((loadedCount / totalAssets) * 100);
-      const bar = document.getElementById('loading-bar');
-      const text = document.getElementById('loading-text');
       
       const fakeMax = 69;
       const fakeCount = Math.floor((loadedCount / totalAssets) * fakeMax);
