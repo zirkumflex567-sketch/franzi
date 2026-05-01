@@ -694,20 +694,26 @@ const Game = (() => {
         else if (buckPhase === 2) frameId = 10;  // fast gallop
         else frameId = 9;                        // buck again
       } else if (Math.abs(state.balance) > 50) {
-        // HEAVY TILT: show bucking frames
-        frameId = state.balance < 0 ? 9 : 11;
+        // HEAVY TILT: violently toggle between buck and rear to show loss of control
+        const step = Math.floor(state.elapsed * 10);
+        frameId = step % 2 === 0 ? 9 : 11;
       } else if (Math.abs(state.balance) > 30) {
-        // MODERATE TILT: fast gallop
-        frameId = 10;
+        // MODERATE TILT: wild galloping and bucking
+        const step = Math.floor(state.elapsed * 10);
+        frameId = step % 2 === 0 ? 10 : (state.balance < 0 ? 9 : 11);
       } else {
-        // NORMAL GALLOP: cycle through run frames
-        const runPhase = Math.floor(state.elapsed * 5) % 6;
-        if (runPhase === 0) frameId = 2;       // run
-        else if (runPhase === 1) frameId = 4;  // run_2
-        else if (runPhase === 2) frameId = 10; // gallop
-        else if (runPhase === 3) frameId = 14; // run_3
-        else if (runPhase === 4) frameId = 2;  // run
-        else frameId = 7;                       // brief idle between strides
+        // NORMAL RODEO: Chaotic, unpredictable mix of movements instead of a smooth run
+        const speed = 8; // 8 frames per second
+        const step = Math.floor(state.elapsed * speed);
+        // Pseudo-random seeded by step
+        const rand = Math.abs(Math.sin(step * 43.21)) * 100;
+        
+        if (rand < 25) frameId = 9;       // wild bucking
+        else if (rand < 50) frameId = 11; // rearing up
+        else if (rand < 70) frameId = 10; // fast gallop
+        else if (rand < 80) frameId = 4;  // run_2
+        else if (rand < 90) frameId = 2;  // run
+        else frameId = 14;                // run_3
       }
 
       const img = assets.horseFrames[frameId];
