@@ -13,7 +13,7 @@ const Game = (() => {
     DISTURB_BASE: 110,      // extremely wild disturbance
     HORSE_BOB_SPEED: 3,     
     GRACE_PERIOD: 0.5,      // only 0.5s invincibility
-    QTE_TIMES: [45, 90, 130, 165], // 4 QTEs
+    QTE_TIMES: [45, 90, 130, 179], // 4 QTEs (Last one exactly 1s before 180s ends)
     QTE_DURATION_START: 10.0, // First QTE gives 10 seconds to read
     QTE_DURATION_END: 3.5,    // Final QTE gives 3.5 seconds
     PHASES: [
@@ -34,7 +34,12 @@ const Game = (() => {
     { name: 'Lila', hex: '#9b59b6' },
     { name: 'Weiß', hex: '#ffffff' },
     { name: 'Orange', hex: '#e67e22' },
-    { name: 'Pink', hex: '#ff9ff3' }
+    { name: 'Pink', hex: '#ff9ff3' },
+    { name: 'Grau', hex: '#95a5a6' },
+    { name: 'Braun', hex: '#8B4513' },
+    { name: 'Cyan', hex: '#00ffff' },
+    { name: 'Beige', hex: '#f5f5dc' },
+    { name: 'Türkis', hex: '#1abc9c' }
   ];
 
   // === STATE ===
@@ -490,24 +495,28 @@ const Game = (() => {
     // 0 = Wähle das Wort, 1 = Wähle die Farbe
     state.qteMode = Math.random() < 0.5 ? 0 : 1;
     
-    // Pick 3 unique colors for the buttons
-    let choices = [...STROOP_COLORS].sort(() => 0.5 - Math.random()).slice(0, 3);
+    // Pick 6 unique colors for the buttons
+    let choices = [...STROOP_COLORS].sort(() => 0.5 - Math.random()).slice(0, 6);
     
     // Pick one as the correct answer
-    let correctIdx = Math.floor(Math.random() * 3);
+    let correctIdx = Math.floor(Math.random() * 6);
     let correctItem = choices[correctIdx];
     
     const instrEl = document.getElementById('qte-instruction');
+    
+    // Randomize the color of the target instruction text to cause maximum confusion
+    let targetTextColor = STROOP_COLORS[Math.floor(Math.random() * STROOP_COLORS.length)].hex;
+    
     if (state.qteMode === 0) {
-      instrEl.innerHTML = `Wähle das Wort:<br><span style="color:white; font-size: 2rem;">${correctItem.name.toUpperCase()}</span>`;
+      instrEl.innerHTML = `Wähle das Wort:<br><span style="color:${targetTextColor}; font-size: 2rem;">${correctItem.name.toUpperCase()}</span>`;
     } else {
-      instrEl.innerHTML = `Wähle die Farbe:<br><span style="color:white; font-size: 2rem;">${correctItem.name.toUpperCase()}</span>`;
+      instrEl.innerHTML = `Wähle die Farbe:<br><span style="color:${targetTextColor}; font-size: 2rem;">${correctItem.name.toUpperCase()}</span>`;
     }
     
     document.getElementById('qte-target').style.display = 'none';
     
-    // Setup the 3 buttons
-    for (let i = 0; i < 3; i++) {
+    // Setup the 6 buttons
+    for (let i = 0; i < 6; i++) {
        let btn = document.getElementById(`qte-btn-${i}`);
        let btnWord, btnColorHex;
        
