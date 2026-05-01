@@ -199,6 +199,18 @@ const Game = (() => {
 
   // === INIT ===
   function init() {
+    // Check URL for difficulty parameter
+    const params = new URLSearchParams(window.location.search);
+    const diffParam = params.get('diff');
+    if (diffParam) {
+      const diffMultiplier = parseFloat(diffParam);
+      if (!isNaN(diffMultiplier) && diffMultiplier > 0) {
+        CFG.GRAVITY_BASE *= diffMultiplier;
+        CFG.DISTURB_BASE *= diffMultiplier;
+        console.log(`Difficulty scaled by ${diffMultiplier}`);
+      }
+    }
+
     canvas = document.getElementById('game-canvas');
     ctx = canvas.getContext('2d');
     resize();
