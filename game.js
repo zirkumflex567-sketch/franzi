@@ -140,8 +140,12 @@ const Game = (() => {
       const pct = Math.floor((loadedCount / totalAssets) * 100);
       const bar = document.getElementById('loading-bar');
       const text = document.getElementById('loading-text');
+      
+      const fakeMax = 69;
+      const fakeCount = Math.floor((loadedCount / totalAssets) * fakeMax);
+      
       if (bar) bar.style.width = pct + '%';
-      if (text) text.textContent = `Lade... ${loadedCount} / ${totalAssets}`;
+      if (text) text.textContent = `Lade... ${fakeCount} / ${fakeMax}`;
 
       if (loadedCount >= totalAssets) {
         setTimeout(() => showScreen('title-screen'), 300);
