@@ -291,8 +291,11 @@ const Game = (() => {
 
     // Sound Toggle
     const soundBtn = document.getElementById('btn-sound-toggle');
-    soundBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
+    const toggleSound = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       state.soundEnabled = !state.soundEnabled;
       if (state.soundEnabled) {
         soundBtn.textContent = '🔊';
@@ -301,7 +304,9 @@ const Game = (() => {
         soundBtn.textContent = '🔈';
         bgMusic.pause();
       }
-    });
+    };
+    soundBtn.addEventListener('click', toggleSound);
+    soundBtn.addEventListener('touchstart', toggleSound);
   }
 
   // === GYRO SETUP ===
@@ -328,8 +333,18 @@ const Game = (() => {
 
   function handleGyro(e) {
     if (!state.running || !state.gyroMode) return;
-    // gamma is left/right tilt in portrait mode (-90 to 90)
-    let tilt = e.gamma;
+    
+    let tilt = 0;
+    const angle = (window.orientation !== undefined) ? window.orientation : (screen.orientation ? screen.orientation.angle : 0);
+    
+    if (angle === 90) {
+      tilt = -e.beta;
+    } else if (angle === -90 || angle === 270) {
+      tilt = e.beta;
+    } else {
+      tilt = e.gamma; // Portrait fallback
+    }
+
     if (tilt > 90) tilt = 90;
     if (tilt < -90) tilt = -90;
     state.gyroTilt = tilt;
