@@ -184,8 +184,8 @@ html, body {
 
 #hud-balance-bar {
   position: absolute;
-  bottom: 60px; left: 50%; transform: translateX(-50%);
-  width: 70%; max-width: 400px;
+  bottom: 25px; left: 50%; transform: translateX(-50%);
+  width: 80%; max-width: 500px;
   z-index: 10;
   pointer-events: none;
 }
@@ -548,7 +548,7 @@ html, body {
 @media (max-width: 480px) {
   #hud { padding: 8px 10px; }
   #timer-display { font-size: 1.5rem; }
-  #hud-balance-bar { width: 80%; bottom: 40px; }
+  #hud-balance-bar { width: 90%; bottom: 20px; }
   .title-text { font-size: 2.2rem; }
   .voucher-card { padding: 1.5rem 1rem; }
 }
@@ -571,7 +571,7 @@ html, body {
 
 #landscape-warning h2 {
   font-family: var(--font-title);
-  color: var(--col-red);
+  color: var(--col-gold);
   font-size: 2rem;
   margin-bottom: 1rem;
 }
@@ -581,8 +581,14 @@ html, body {
   color: var(--col-white);
 }
 
-@media screen and (orientation: landscape) and (max-height: 500px) {
+/* Now warning shows in PORTRAIT and hides in LANDSCAPE */
+@media screen and (orientation: portrait) {
   #landscape-warning {
     display: flex;
+  }
+}
+@media screen and (orientation: landscape) {
+  #landscape-warning {
+    display: none;
   }
 }

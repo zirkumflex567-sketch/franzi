@@ -334,7 +334,7 @@ const Game = (() => {
         document.documentElement.requestFullscreen().catch(() => {});
       }
       if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('portrait').catch(() => {});
+        screen.orientation.lock('landscape').catch(() => {});
       }
     } catch(e) {}
 
@@ -641,7 +641,7 @@ const Game = (() => {
     for (let i = 0; i < 5; i++) {
       state.dustParticles.push({
         x: W / 2 + (Math.random() - 0.5) * 100,
-        y: H * 0.60,
+        y: H * 0.70,
         vx: (Math.random() - 0.5) * 120,
         vy: -Math.random() * 60 - 20,
         life: 0.6 + Math.random() * 0.4,
@@ -777,7 +777,7 @@ const Game = (() => {
 
   function drawHorse() {
     const cx = W / 2;
-    const groundY = H * 0.60; // Moved much higher up on the screen
+    const groundY = H * 0.70; // Adjusted for landscape mode (slightly lower relative to H)
 
     ctx.save();
     ctx.translate(cx, groundY);
@@ -848,9 +848,8 @@ const Game = (() => {
 
       const img = assets.horseFrames[frameId];
       if (img && img.naturalWidth) {
-        // Significantly larger horse: take up more screen width, especially on mobile!
-        // Take up 90% of screen width, or at least 380px, max 700px.
-        const targetW = Math.min(Math.max(W * 0.9, 380), 700);
+        // Landscape optimization: scale relative to height H rather than width W
+        const targetW = Math.min(Math.max(H * 1.2, 380), 800);
         const s = targetW / img.naturalWidth;
         const dw = img.naturalWidth * s;
         const dh = img.naturalHeight * s;
