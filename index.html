@@ -19,10 +19,13 @@
         <p class="title-birthday">Alles Gute zum 31. Geburtstag!</p>
         <div class="title-instructions">
           <p>🎯 Halte <strong>3 Minuten</strong> auf dem Pferd!</p>
-          <p>📱 Tippe <strong>links/rechts</strong> zum Balancieren</p>
+          <p>📱 Tippe <strong>links/rechts</strong> oder nutze den <strong>Gyro-Sensor</strong></p>
           <p>⌨️ Oder nutze <strong>← →</strong> Pfeiltasten</p>
         </div>
-        <button id="btn-start" class="btn-primary" onclick="Game.start()">🤠 LOS GEHT'S!</button>
+        <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+          <button id="btn-start-touch" class="btn-primary" onclick="Game.start('touch')">👆 START (TOUCH)</button>
+          <button id="btn-start-gyro" class="btn-primary" style="background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 6px 25px rgba(52,152,219,0.4);" onclick="Game.start('gyro')">📱 START (GYRO)</button>
+        </div>
       </div>
     </div>
 

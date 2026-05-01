@@ -217,13 +217,57 @@ const Game = (() => {
     tr.addEventListener('mouseleave', handleRightEnd);
   }
 
+  // === GYRO SETUP ===
+  function setupGyro(onSuccess) {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(permissionState => {
+          if (permissionState === 'granted') {
+            onSuccess(true);
+          } else {
+            alert('Gyro-Zugriff verweigert! Starte im Touch-Modus.');
+            onSuccess(false);
+          }
+        })
+        .catch(e => {
+          console.error(e);
+          onSuccess(false);
+        });
+    } else {
+      // Non-iOS13+ or desktop
+      onSuccess(true);
+    }
+  }
+
+  function handleGyro(e) {
+    if (!state.running || !state.gyroMode) return;
+    // gamma is left/right tilt in portrait mode (-90 to 90)
+    let tilt = e.gamma;
+    if (tilt > 90) tilt = 90;
+    if (tilt < -90) tilt = -90;
+    state.gyroTilt = tilt;
+  }
+
+  window.addEventListener('deviceorientation', handleGyro, true);
+
   // === START / RESTART ===
-  function start() {
+  function start(mode = 'touch') {
+    if (mode === 'gyro') {
+      setupGyro((success) => {
+        internalStart(success ? 'gyro' : 'touch');
+      });
+    } else {
+      internalStart('touch');
+    }
+  }
+
+  function internalStart(mode) {
     if (loopId) cancelAnimationFrame(loopId);
 
     state = {
       running: true, failed: false, won: false, balance: 0, elapsed: 0, lastTime: 0,
       inputLeft: false, inputRight: false,
+      gyroMode: mode === 'gyro', gyroTilt: 0,
       qteActive: false, qteTimer: 0, qteMaxTimer: 10, qteCount: 0, qteFired: [],
       dustParticles: [],
       cameraShake: { x: 0, y: 0, intensity: 0 },
@@ -240,7 +284,7 @@ const Game = (() => {
     loopId = requestAnimationFrame(loop);
   }
 
-  function restart() { start(); }
+  function restart() { start(state.gyroMode ? 'gyro' : 'touch'); }
 
   function stopMusic() {
     if (bgMusic) {
@@ -330,8 +374,17 @@ const Game = (() => {
 
     // Player correction
     let correction = 0;
-    if (state.inputLeft) correction -= CFG.CORRECTION_SPEED * dt;
-    if (state.inputRight) correction += CFG.CORRECTION_SPEED * dt;
+    if (state.gyroMode) {
+      let tilt = state.gyroTilt || 0;
+      if (Math.abs(tilt) < 3) tilt = 0; // slight deadzone to prevent drift
+      // Clamp between -45 and 45 for max correction
+      tilt = Math.max(-45, Math.min(45, tilt));
+      // Map -45..45 directly to -CORRECTION_SPEED..CORRECTION_SPEED
+      correction = (tilt / 45) * CFG.CORRECTION_SPEED * dt;
+    } else {
+      if (state.inputLeft) correction -= CFG.CORRECTION_SPEED * dt;
+      if (state.inputRight) correction += CFG.CORRECTION_SPEED * dt;
+    }
 
     state.balance += gravityPull + disturbance + jerk + correction;
     state.balance = Math.max(-90, Math.min(90, state.balance));
