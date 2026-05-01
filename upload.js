@@ -30,7 +30,20 @@ console.log(`Uploading intro_merged.mp4...`);
 execSync(`type "${TMP}" | ssh htown "base64 -d > ${DST}/assets/intro_merged.mp4"`, { shell: 'cmd.exe', timeout: 120000 });
 console.log('Intro uploaded.');
 
-// Upload win video
+// Upload horse assets (1-15 and mirrored)
+try { execSync(`ssh htown "mkdir -p ${DST}/assets"`); } catch(e){}
+for (let i = 1; i <= 15; i++) {
+  const files = [`${i}.png`, `${i}_m.png`];
+  files.forEach(f => {
+    const srcPath = `${SRC}/assets/${f}`;
+    if (fs.existsSync(srcPath)) {
+      const data = fs.readFileSync(srcPath);
+      fs.writeFileSync(TMP, data.toString('base64'));
+      execSync(`type "${TMP}" | ssh htown "base64 -d > ${DST}/assets/${f}"`, { shell: 'cmd.exe', timeout: 30000 });
+      console.log(`Uploaded: assets/${f}`);
+    }
+  });
+}
 
 // Upload win video
 try { execSync(`ssh htown "mkdir -p ${DST}/assets"`); } catch(e){}

@@ -64,6 +64,7 @@ const Game = (() => {
     bgLoaded: false,
     bg: new Image(),
     horseFrames: {},
+    horseFramesMirrored: {},
     horseFramesLoaded: 0,
     guys: {},       // guys.ahrens.front[0..29], guys.ahrens.back[0..29], etc.
     guysLoaded: 0,
@@ -76,6 +77,7 @@ const Game = (() => {
   const HORSE_TOTAL_FRAMES = 15;
   for (let i = 1; i <= HORSE_TOTAL_FRAMES; i++) {
     assets.horseFrames[i] = new Image();
+    assets.horseFramesMirrored[i] = new Image();
   }
 
   // === GUY ANIMATION SYSTEM ===
@@ -136,7 +138,7 @@ const Game = (() => {
 
   // Try loading images – if not found, we draw placeholders
   function loadAssets() {
-    let totalAssets = 1 + HORSE_TOTAL_FRAMES + GUY_TOTAL_IMAGES + 1; // bg + horse + guys + audio
+    let totalAssets = 1 + (HORSE_TOTAL_FRAMES * 2) + GUY_TOTAL_IMAGES + 1; // bg + horse (2x) + guys + audio
     let loadedCount = 0;
 
     const bar = document.getElementById('loading-bar');
@@ -192,6 +194,10 @@ const Game = (() => {
       assets.horseFrames[i].onload = () => { assets.horseFramesLoaded++; updateProgress(); };
       assets.horseFrames[i].onerror = updateProgress;
       assets.horseFrames[i].src = `assets/${i}.png`;
+
+      assets.horseFramesMirrored[i].onload = () => { assets.horseFramesLoaded++; updateProgress(); };
+      assets.horseFramesMirrored[i].onerror = updateProgress;
+      assets.horseFramesMirrored[i].src = `assets/${i}_m.png`;
     }
 
     // Load all guy frames
@@ -958,7 +964,12 @@ const Game = (() => {
         }
       }
 
-      const img = assets.horseFrames[frameId];
+      // Meaningful use of mirrored frames:
+      // If horse leans left (balance < 0), we use mirrored frames to make it face left.
+      // If horse leans right (balance > 0), we use original frames (facing right).
+      const useMirrored = state.balance < 0;
+      const img = useMirrored ? assets.horseFramesMirrored[frameId] : assets.horseFrames[frameId];
+
       if (img && img.naturalWidth) {
         // Landscape optimization: scale relative to height H rather than width W
         const targetW = Math.min(Math.max(H * 1.2, 380), 800);
