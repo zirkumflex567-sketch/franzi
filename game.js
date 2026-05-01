@@ -14,7 +14,8 @@ const Game = (() => {
     HORSE_BOB_SPEED: 3,     // horse bobbing frequency
     GRACE_PERIOD: 3,        // seconds of invincibility at start
     QTE_TIMES: [45, 90, 130, 165], // 4 QTEs
-    QTE_DURATION: 3.5,      // 3.5 seconds to solve Stroop test
+    QTE_DURATION_START: 10.0, // First QTE gives 10 seconds to read
+    QTE_DURATION_END: 3.5,    // Final QTE gives 3.5 seconds
     PHASES: [
       { name: 'Orientierung', start: 0,   end: 30,  color: '#2ecc71' },
       { name: 'Aufwärmung',   start: 30,  end: 75,  color: '#3498db' },
@@ -223,7 +224,7 @@ const Game = (() => {
     state = {
       running: true, failed: false, won: false, balance: 0, elapsed: 0, lastTime: performance.now(),
       inputLeft: false, inputRight: false,
-      qteActive: false, qteTimer: 0, qteFired: [],
+      qteActive: false, qteTimer: 0, qteMaxTimer: 10, qteCount: 0, qteFired: [],
       dustParticles: [],
       cameraShake: { x: 0, y: 0, intensity: 0 },
       failTime: 0,
@@ -357,7 +358,7 @@ const Game = (() => {
     if (!state.qteActive) return;
     state.qteTimer -= dt;
 
-    const pct = Math.max(0, state.qteTimer / CFG.QTE_DURATION);
+    const pct = Math.max(0, state.qteTimer / state.qteMaxTimer);
     document.getElementById('qte-timer-fill').style.width = (pct * 100) + '%';
 
     if (state.qteTimer <= 0) { endQTE(false); }
@@ -365,7 +366,14 @@ const Game = (() => {
 
   function startQTE() {
     state.qteActive = true;
-    state.qteTimer = CFG.QTE_DURATION;
+    
+    // Scale duration from QTE_DURATION_START to QTE_DURATION_END
+    const progress = Math.min(state.qteCount / 3, 1.0); // 0.0, 0.33, 0.66, 1.0
+    const duration = CFG.QTE_DURATION_START - (CFG.QTE_DURATION_START - CFG.QTE_DURATION_END) * progress;
+    
+    state.qteMaxTimer = duration;
+    state.qteTimer = duration;
+    state.qteCount++;
 
     // 0 = Wähle das Wort, 1 = Wähle die Farbe
     state.qteMode = Math.random() < 0.5 ? 0 : 1;
