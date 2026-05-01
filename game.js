@@ -9,10 +9,10 @@ const Game = (() => {
     DURATION: 180,          // 3 minutes in seconds
     FAIL_ANGLE: 85,         // degrees → game over
     CORRECTION_SPEED: 220,  // balance correction per second
-    GRAVITY_BASE: 25,       // base gravity pull (increased from 18 = much harder)
-    DISTURB_BASE: 45,       // base disturbance strength (increased from 30)
+    GRAVITY_BASE: 35,       // base gravity pull
+    DISTURB_BASE: 70,       // base disturbance strength
     HORSE_BOB_SPEED: 3,     // horse bobbing frequency
-    GRACE_PERIOD: 3,        // seconds of invincibility at start
+    GRACE_PERIOD: 1,        // seconds of invincibility at start
     QTE_TIMES: [45, 90, 130, 165], // 4 QTEs
     QTE_DURATION_START: 10.0, // First QTE gives 10 seconds to read
     QTE_DURATION_END: 3.5,    // Final QTE gives 3.5 seconds
@@ -292,8 +292,8 @@ const Game = (() => {
       state.balance *= 0.95; // auto-center during grace
     }
 
-    // Early-game easing: 0→1 ramp over first 20 seconds (faster ramp = harder)
-    const earlyEase = Math.min(1, t / 20);
+    // Early-game easing: ramp over first 5 seconds
+    const earlyEase = Math.min(1, t / 5);
 
     // Difficulty: sqrt-based scaling (starts gentle, gets brutal)
     const diffFactor = (0.4 + Math.sqrt(t / CFG.DURATION) * 1.4) * earlyEase;
@@ -507,7 +507,7 @@ const Game = (() => {
     for (let i = 0; i < 5; i++) {
       state.dustParticles.push({
         x: W / 2 + (Math.random() - 0.5) * 100,
-        y: H * 0.72,
+        y: H * 0.60,
         vx: (Math.random() - 0.5) * 120,
         vy: -Math.random() * 60 - 20,
         life: 0.6 + Math.random() * 0.4,
@@ -643,7 +643,7 @@ const Game = (() => {
 
   function drawHorse() {
     const cx = W / 2;
-    const groundY = H * 0.78;
+    const groundY = H * 0.60; // Moved much higher up on the screen
 
     ctx.save();
     ctx.translate(cx, groundY);
@@ -710,8 +710,8 @@ const Game = (() => {
       const img = assets.horseFrames[frameId];
       if (img && img.naturalWidth) {
         // Significantly larger horse: take up more screen width, especially on mobile!
-        // At least 350px wide, or 65% of screen width if that's larger. But don't exceed 600px.
-        const targetW = Math.min(Math.max(W * 0.65, 350), 600);
+        // Take up 90% of screen width, or at least 380px, max 700px.
+        const targetW = Math.min(Math.max(W * 0.9, 380), 700);
         const s = targetW / img.naturalWidth;
         const dw = img.naturalWidth * s;
         const dh = img.naturalHeight * s;
