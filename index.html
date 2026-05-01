@@ -63,6 +63,10 @@
           <div class="hud-label">ZEIT</div>
           <div id="timer-display">3:00</div>
         </div>
+        <div id="hud-best" style="position: absolute; top: 10px; right: 20px; text-align: right;">
+          <div class="hud-label">BEST</div>
+          <div id="best-display" style="font-size: 1.2rem; color: var(--col-gold); font-family: var(--font-title);">0:00</div>
+        </div>
         <div id="hud-phase">
           <div class="hud-label">PHASE</div>
           <div id="phase-display">Orientierung</div>
@@ -103,6 +107,7 @@
       <div class="result-content">
         <h2 class="fail-title">💥 ABGEWORFEN!</h2>
         <p class="fail-text">Du hast <span id="fail-time">0:00</span> durchgehalten!</p>
+        <p id="highscore-info" style="color: var(--col-gold); font-weight: 600; margin-bottom: 15px;">Bester Ritt: <span id="best-time">0:00</span></p>
         <p class="fail-encourage">Franziska gibt nicht auf! Nochmal?</p>
         <button class="btn-primary" onclick="Game.restart()">🔄 NOCHMAL!</button>
       </div>

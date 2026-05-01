@@ -52,7 +52,8 @@ const Game = (() => {
     dustParticles: [],
     cameraShake: { x: 0, y: 0, intensity: 0 },
     assetsReady: false,
-    soundEnabled: true,   // Moved here to be clear
+    soundEnabled: true,   
+    highscore: 0,        // Local highscore in seconds
   };
 
   let canvas, ctx, W, H;
@@ -244,6 +245,27 @@ const Game = (() => {
       const dbgBtn = document.getElementById('btn-debug-jump');
       if (dbgBtn) dbgBtn.classList.remove('hidden');
     }
+    // LOAD HIGHSCORE
+    const savedHighscore = localStorage.getItem('rodeo_highscore');
+    if (savedHighscore) {
+      state.highscore = parseFloat(savedHighscore);
+    }
+    updateHighscoreDisplay();
+  }
+
+  function updateHighscoreDisplay() {
+    const bestTimeStr = formatTime(state.highscore);
+    const bestHUD = document.getElementById('best-display');
+    if (bestHUD) bestHUD.textContent = bestTimeStr;
+    const bestFail = document.getElementById('best-time');
+    if (bestFail) bestFail.textContent = bestTimeStr;
+  }
+
+  function formatTime(totalSeconds) {
+    const sec = Math.floor(totalSeconds);
+    const min = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${min}:${s.toString().padStart(2, '0')}`;
   }
 
   // === DEBUG FUNCTIONS ===
@@ -437,6 +459,7 @@ const Game = (() => {
       winTime: 0,
       soundEnabled: state.soundEnabled, // Preserve sound setting!
       assetsReady: state.assetsReady,
+      highscore: state.highscore,
     };
     randomizeGuyPositions();
     showScreen('game-screen');
@@ -984,6 +1007,13 @@ const Game = (() => {
     const s = sec % 60;
     document.getElementById('fail-time').textContent =
       `${min}:${s.toString().padStart(2, '0')}`;
+
+    // Update Highscore?
+    if (state.elapsed > state.highscore) {
+      state.highscore = state.elapsed;
+      localStorage.setItem('rodeo_highscore', state.highscore.toString());
+      updateHighscoreDisplay();
+    }
     // Shake the canvas
     const gc = document.getElementById('game-screen');
     gc.classList.add('shake-heavy');
