@@ -8,11 +8,11 @@ const Game = (() => {
   const CFG = {
     DURATION: 180,          // 3 minutes in seconds
     FAIL_ANGLE: 85,         // degrees → game over
-    CORRECTION_SPEED: 220,  // balance correction per second
-    GRAVITY_BASE: 35,       // base gravity pull
-    DISTURB_BASE: 70,       // base disturbance strength
-    HORSE_BOB_SPEED: 3,     // horse bobbing frequency
-    GRACE_PERIOD: 1,        // seconds of invincibility at start
+    CORRECTION_SPEED: 260,  // increased to give a fighting chance against insane gravity
+    GRAVITY_BASE: 55,       // much stronger base pull
+    DISTURB_BASE: 110,      // extremely wild disturbance
+    HORSE_BOB_SPEED: 3,     
+    GRACE_PERIOD: 0.5,      // only 0.5s invincibility
     QTE_TIMES: [45, 90, 130, 165], // 4 QTEs
     QTE_DURATION_START: 10.0, // First QTE gives 10 seconds to read
     QTE_DURATION_END: 3.5,    // Final QTE gives 3.5 seconds
@@ -383,11 +383,11 @@ const Game = (() => {
       state.balance *= 0.95; // auto-center during grace
     }
 
-    // Early-game easing: ramp over first 5 seconds
-    const earlyEase = Math.min(1, t / 5);
+    // Early-game easing: ramp over first 2 seconds (starts brutally fast)
+    const earlyEase = Math.min(1, t / 2);
 
-    // Difficulty: sqrt-based scaling (starts gentle, gets brutal)
-    const diffFactor = (0.4 + Math.sqrt(t / CFG.DURATION) * 1.4) * earlyEase;
+    // Difficulty: steeper scaling
+    const diffFactor = (0.5 + Math.sqrt(t / CFG.DURATION) * 1.6) * earlyEase;
 
     // Gravity: always pulls toward current lean direction (self-reinforcing!)
     const gravityPull = Math.sign(state.balance) * CFG.GRAVITY_BASE * diffFactor * dt;
@@ -397,23 +397,23 @@ const Game = (() => {
     const randomKick = (Math.random() - 0.5) * 2.0;
     const disturbance = (sineWave + randomKick) * CFG.DISTURB_BASE * diffFactor * dt;
 
-    // Sudden jerks – more frequent and stronger
+    // Sudden jerks – much more frequent and brutal
     let jerk = 0;
-    if (t > 30 && Math.random() < 0.012 * diffFactor) {
-      jerk = (Math.random() - 0.5) * 30;
-      triggerShake(0.3);
-    }
-    if (t > 90 && Math.random() < 0.015 * diffFactor) {
-      jerk += (Math.random() - 0.5) * 22;
+    if (t > 15 && Math.random() < 0.02 * diffFactor) {
+      jerk = (Math.random() - 0.5) * 45;
       triggerShake(0.4);
     }
-    if (t > 140 && Math.random() < 0.02) {
-      jerk += (Math.random() - 0.5) * 25;
-      triggerShake(0.5);
+    if (t > 60 && Math.random() < 0.025 * diffFactor) {
+      jerk += (Math.random() - 0.5) * 40;
+      triggerShake(0.6);
+    }
+    if (t > 120 && Math.random() < 0.035) {
+      jerk += (Math.random() - 0.5) * 55;
+      triggerShake(0.7);
     }
     // Rodeo finale: constant chaos
-    if (t > 160) {
-      jerk += (Math.random() - 0.5) * 15;
+    if (t > 150) {
+      jerk += (Math.random() - 0.5) * 35;
     }
 
     // Player correction
