@@ -8,9 +8,9 @@ const Game = (() => {
   const CFG = {
     DURATION: 180,          // 3 minutes in seconds
     FAIL_ANGLE: 85,         // degrees → game over
-    CORRECTION_SPEED: 260,  // increased to give a fighting chance against insane gravity
-    GRAVITY_BASE: 55,       // much stronger base pull
-    DISTURB_BASE: 110,      // extremely wild disturbance
+    CORRECTION_SPEED: 450,  // significantly buffed to fight the strong gravity
+    GRAVITY_BASE: 55,       
+    DISTURB_BASE: 80,       // slightly reduced to keep it fair
     HORSE_BOB_SPEED: 3,     
     GRACE_PERIOD: 0.5,      // only 0.5s invincibility
     QTE_TIMES: [45, 90, 130, 179], // 4 QTEs (Last one exactly 1s before 180s ends)
@@ -545,9 +545,10 @@ const Game = (() => {
 
     if (state.gyroMode) {
       let tilt = state.gyroTilt || 0;
-      if (Math.abs(tilt) < 3) tilt = 0; // slight deadzone to prevent drift
-      tilt = Math.max(-45, Math.min(45, tilt));
-      correction += (tilt / 45) * CFG.CORRECTION_SPEED * dt;
+      if (Math.abs(tilt) < 2) tilt = 0; // tighter deadzone
+      // Utilization of full range: 45 deg = 100% speed, 90 deg = 200% speed
+      const multiplier = tilt / 45; 
+      correction += multiplier * CFG.CORRECTION_SPEED * dt;
     }
 
     state.balance += gravityPull + disturbance + jerk + correction;
