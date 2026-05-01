@@ -154,7 +154,7 @@ const Game = (() => {
       if (text) text.textContent = `Lade... ${fakeCount} / ${fakeMax}`;
 
       if (loadedCount >= totalAssets) {
-        setTimeout(() => showScreen('title-screen'), 300);
+        setTimeout(() => playIntro(), 300);
       }
     }
 
@@ -226,6 +226,39 @@ const Game = (() => {
 
     // Init background music
     // (Audio is now loaded in loadAssets)
+  }
+
+  // === INTRO PLAYER ===
+  function playIntro() {
+    showScreen('intro-screen');
+    const vid = document.getElementById('intro-video');
+    const skipBtn = document.getElementById('btn-skip-intro');
+    const playlist = ['assets/video1.mp4', 'assets/video2.mp4', 'assets/video3.mp4'];
+    let currentIdx = 0;
+
+    const playNext = () => {
+      if (currentIdx < playlist.length) {
+        vid.src = playlist[currentIdx];
+        vid.play().catch(() => {
+          // If autoplay fails, we might need a "Start Intro" button, but usually preloader interaction counts.
+          console.warn("Autoplay failed, waiting for user...");
+        });
+        currentIdx++;
+      } else {
+        finishIntro();
+      }
+    };
+
+    const finishIntro = () => {
+      vid.pause();
+      skipBtn.classList.add('hidden');
+      document.getElementById('start-overlay').classList.remove('hidden');
+    };
+
+    vid.onended = playNext;
+    skipBtn.onclick = finishIntro;
+
+    playNext();
   }
 
   function resize() {

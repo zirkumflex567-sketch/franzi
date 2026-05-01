@@ -30,20 +30,16 @@
       <p id="loading-text" style="margin-top: 15px; font-size: 1.1rem; color: var(--col-white); opacity: 0.8; font-family: var(--font-body);">Assets werden geladen...</p>
     </div>
 
-    <!-- ===== TITLE SCREEN ===== -->
-    <div id="title-screen" class="screen">
-      <div class="title-bg"></div>
-      <div class="title-content">
-        <h1 class="title-text">🐴 RODEO<br><span class="title-sub">Franziskas Ritt</span></h1>
-        <p class="title-birthday">Alles Gute zum 31. Geburtstag!</p>
-        <div class="title-instructions">
-          <p>🎯 Halte <strong>3 Minuten</strong> auf dem Pferd!</p>
-          <p>📱 Tippe <strong>links/rechts</strong> oder nutze den <strong>Gyro-Sensor</strong></p>
-          <p>⌨️ Oder nutze <strong>← →</strong> Pfeiltasten</p>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
-          <button id="btn-start-touch" class="btn-primary" onclick="Game.start('touch')">👆 START (TOUCH)</button>
-          <button id="btn-start-gyro" class="btn-primary" style="background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 6px 25px rgba(52,152,219,0.4);" onclick="Game.start('gyro')">📱 START (GYRO)</button>
+    <!-- ===== INTRO SCREEN ===== -->
+    <div id="intro-screen" class="screen">
+      <video id="intro-video" style="width: 100%; height: 100%; object-fit: cover;" preload="auto" playsinline></video>
+      <button id="btn-skip-intro" class="btn-primary" style="position: absolute; bottom: 20px; right: 20px; z-index: 100; font-size: 1rem; padding: 10px 20px;">Skip ➔</button>
+      
+      <div id="start-overlay" class="hidden" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 110; text-align: center;">
+        <h1 class="title-text" style="text-shadow: 0 0 20px rgba(0,0,0,0.8);">🐴 RODEO<br><span class="title-sub">Franziskas Ritt</span></h1>
+        <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; margin-top: 2rem;">
+          <button class="btn-primary" onclick="Game.start('touch')">👆 START (TOUCH)</button>
+          <button class="btn-primary" style="background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 6px 25px rgba(52,152,219,0.4);" onclick="Game.start('gyro')">📱 START (GYRO)</button>
         </div>
       </div>
     </div>

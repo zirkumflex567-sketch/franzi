@@ -22,6 +22,15 @@ fs.writeFileSync(TMP, dataSlider.toString('base64'));
 execSync(`type "${TMP}" | ssh htown "base64 -d > ${DST}/2/index.html"`, { shell: 'cmd.exe', timeout: 30000 });
 console.log(`Uploaded: 2/index.html`);
 
+// Upload intro videos
+try { execSync(`ssh htown "mkdir -p ${DST}/assets"`); } catch(e){}
+['video1.mp4', 'video2.mp4', 'video3.mp4'].forEach(v => {
+  const data = fs.readFileSync(`${SRC}/assets/${v}`);
+  fs.writeFileSync(TMP, data.toString('base64'));
+  console.log(`Uploading ${v}...`);
+  execSync(`type "${TMP}" | ssh htown "base64 -d > ${DST}/assets/${v}"`, { shell: 'cmd.exe', timeout: 120000 });
+});
+
 // Upload win video
 try { execSync(`ssh htown "mkdir -p ${DST}/assets"`); } catch(e){}
 const dataVideo = fs.readFileSync(`${SRC}/assets/win.mp4`);

@@ -44,6 +44,7 @@ html, body {
   justify-content: center;
 }
 .screen.active { display: flex; }
+.hidden { display: none !important; }
 
 /* ===== TITLE SCREEN ===== */
 #title-screen {
