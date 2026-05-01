@@ -154,7 +154,9 @@ const Game = (() => {
       if (text) text.textContent = `Lade... ${fakeCount} / ${fakeMax}`;
 
       if (loadedCount >= totalAssets) {
-        setTimeout(() => playIntro(), 300);
+        text.textContent = "ALLES BEREIT!";
+        const startBtn = document.getElementById('btn-start-intro');
+        if (startBtn) startBtn.classList.remove('hidden');
       }
     }
 
@@ -479,18 +481,16 @@ const Game = (() => {
       jerk += (Math.random() - 0.5) * 35;
     }
 
-    // Player correction
+    // Player correction (Keyboard always works, Gyro is additive/alternative)
     let correction = 0;
+    if (state.inputLeft) correction -= CFG.CORRECTION_SPEED * dt;
+    if (state.inputRight) correction += CFG.CORRECTION_SPEED * dt;
+
     if (state.gyroMode) {
       let tilt = state.gyroTilt || 0;
       if (Math.abs(tilt) < 3) tilt = 0; // slight deadzone to prevent drift
-      // Clamp between -45 and 45 for max correction
       tilt = Math.max(-45, Math.min(45, tilt));
-      // Map -45..45 directly to -CORRECTION_SPEED..CORRECTION_SPEED
-      correction = (tilt / 45) * CFG.CORRECTION_SPEED * dt;
-    } else {
-      if (state.inputLeft) correction -= CFG.CORRECTION_SPEED * dt;
-      if (state.inputRight) correction += CFG.CORRECTION_SPEED * dt;
+      correction += (tilt / 45) * CFG.CORRECTION_SPEED * dt;
     }
 
     state.balance += gravityPull + disturbance + jerk + correction;
@@ -961,6 +961,5 @@ const Game = (() => {
 
   // Init on load
   window.addEventListener('DOMContentLoaded', init);
-
-  return { start, restart };
+  return { start, restart, playIntro };
 })();
