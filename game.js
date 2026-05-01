@@ -222,7 +222,7 @@ const Game = (() => {
     if (loopId) cancelAnimationFrame(loopId);
 
     state = {
-      running: true, failed: false, won: false, balance: 0, elapsed: 0, lastTime: performance.now(),
+      running: true, failed: false, won: false, balance: 0, elapsed: 0, lastTime: 0,
       inputLeft: false, inputRight: false,
       qteActive: false, qteTimer: 0, qteMaxTimer: 10, qteCount: 0, qteFired: [],
       dustParticles: [],
@@ -251,7 +251,10 @@ const Game = (() => {
 
   // === MAIN LOOP ===
   function loop(now) {
-    const dt = Math.min((now - state.lastTime) / 1000, 0.05); // cap delta
+    if (!state.lastTime) state.lastTime = now;
+    let dt = (now - state.lastTime) / 1000;
+    if (dt < 0) dt = 0;
+    dt = Math.min(dt, 0.05); // cap delta
     state.lastTime = now;
     
     if (state.running) {
