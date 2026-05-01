@@ -878,25 +878,13 @@ const Game = (() => {
   // === WIN / FAIL ===
   function win() {
     state.running = false;
-    state.won = true;
-    state.winTime = 0;
-    // Keep rendering to show victory frame
-    const victoryLoop = (now) => {
-      const dt = (now - state.lastTime) / 1000;
-      state.lastTime = now;
-      state.winTime += dt;
-      updateEffects(dt);
-      render();
-      if (state.winTime < 3) {
-        requestAnimationFrame(victoryLoop);
-      } else {
-        state.won = false;
-        stopMusic();
-        showScreen('win-screen');
-        spawnConfetti();
-      }
-    };
-    requestAnimationFrame(victoryLoop);
+    stopMusic();
+    showScreen('win-screen');
+    const vid = document.getElementById('win-video');
+    if (vid) {
+      vid.currentTime = 0;
+      vid.play().catch(e => console.error("Video play failed:", e));
+    }
   }
 
   function fail() {

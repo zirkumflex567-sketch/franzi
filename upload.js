@@ -22,5 +22,13 @@ fs.writeFileSync(TMP, dataSlider.toString('base64'));
 execSync(`type "${TMP}" | ssh htown "base64 -d > ${DST}/2/index.html"`, { shell: 'cmd.exe', timeout: 30000 });
 console.log(`Uploaded: 2/index.html`);
 
+// Upload win video
+try { execSync(`ssh htown "mkdir -p ${DST}/assets"`); } catch(e){}
+const dataVideo = fs.readFileSync(`${SRC}/assets/win.mp4`);
+fs.writeFileSync(TMP, dataVideo.toString('base64'));
+console.log('Uploading win.mp4 (this might take a minute)...');
+execSync(`type "${TMP}" | ssh htown "base64 -d > ${DST}/assets/win.mp4"`, { shell: 'cmd.exe', timeout: 120000 });
+console.log(`Uploaded: assets/win.mp4`);
+
 if (fs.existsSync(TMP)) fs.unlinkSync(TMP);
 console.log('Upload OK');
