@@ -384,9 +384,9 @@ const Game = (() => {
     const normAngle = ((angle % 360) + 360) % 360;
 
     if (normAngle === 90) {
-      tilt = -e.beta;
+      tilt = e.beta;  // Inverted sign
     } else if (normAngle === 270) {
-      tilt = e.beta;
+      tilt = -e.beta; // Inverted sign
     } else if (normAngle === 180) {
       tilt = -e.gamma;
     } else {
