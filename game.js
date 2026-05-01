@@ -108,7 +108,7 @@ const Game = (() => {
     cooldown: 2 + Math.random() * 4, // seconds until next animation starts
     cooldownTimer: Math.random() * 3,  // stagger start times
     x: 0,                              // randomized on start()
-    scale: 2.2,                         // Significantly larger for landscape mode
+    scale: 1.4,                         // Balanced for landscape mode
   }));
 
   // Randomize guy positions along the fence each run
